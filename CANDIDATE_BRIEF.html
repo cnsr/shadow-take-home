@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Shadow · Full-Stack Take-Home</title>
+<style>
+  :root{
+    --bg:#f6f6f4; --surface:#ffffff; --surface-2:#f1f1ef;
+    --ink-0:#16161a; --ink-1:#3a3a40; --ink-2:#6b6b73; --ink-3:#9a9aa2;
+    --line:#e7e7e3; --accent:#16161a; --live:#2f9e6b;
+    --shadow-sm:0 1px 2px rgba(16,16,22,.06),0 1px 1px rgba(16,16,22,.04);
+    --shadow-md:0 6px 22px rgba(16,16,22,.08),0 1px 2px rgba(16,16,22,.05);
+    --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,Helvetica,Arial,sans-serif;
+    --mono:'SFMono-Regular',ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink-0);font-family:var(--font);-webkit-font-smoothing:antialiased;line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:56px 24px 96px}
+  .mark{width:38px;height:38px;border-radius:11px;background:radial-gradient(120% 120% at 30% 20%,#2a2a30 0%,#0c0c0f 70%);box-shadow:var(--shadow-sm),inset 0 1px 0 rgba(255,255,255,.12)}
+  .eyebrow{font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin:22px 0 6px}
+  h1{font-size:34px;letter-spacing:-.025em;margin:6px 0 10px;line-height:1.12}
+  h2{font-size:20px;letter-spacing:-.015em;margin:44px 0 6px;padding-top:26px;border-top:1px solid var(--line)}
+  h3{font-size:15.5px;margin:22px 0 6px;letter-spacing:-.01em}
+  p{color:var(--ink-1);margin:10px 0}
+  .lede{font-size:17px;color:var(--ink-1)}
+  a{color:var(--ink-0)}
+  code{font-family:var(--mono);font-size:.88em;background:var(--surface-2);padding:2px 6px;border-radius:6px;color:var(--ink-0)}
+  pre{font-family:var(--mono);font-size:12.5px;line-height:1.5;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;overflow-x:auto;box-shadow:var(--shadow-sm)}
+  ul,ol{color:var(--ink-1);padding-left:22px}
+  li{margin:7px 0}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-sm);margin:16px 0}
+  .tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);background:var(--surface-2);border:1px solid var(--line);padding:3px 9px;border-radius:999px}
+  .meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+  .callout{background:#fbfbfa;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:12px;padding:14px 18px;margin:16px 0}
+  .callout strong{color:var(--ink-0)}
+  .step{display:flex;gap:14px;margin:14px 0}
+  .step__n{flex:none;width:26px;height:26px;border-radius:8px;background:var(--accent);color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm)}
+  .muted{color:var(--ink-2)}
+  .hr{height:1px;background:var(--line);border:0;margin:30px 0}
+  .foot{color:var(--ink-3);font-size:13px;margin-top:40px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="mark"></div>
+  <div class="eyebrow">Full-Stack Engineer · Take-Home</div>
+  <h1>Make the agent solid, then make it better.</h1>
+  <p class="lede">You're inheriting a small browser app: an agent that answers marketing questions over a fixed dataset and streams its reasoning as it works. It runs — but it's rough around the edges. We'd like to see how you bring something like this up to production quality and extend it.</p>
+
+  <div class="meta">
+    <span class="tag">~2–3 hours</span>
+    <span class="tag">Runs in the browser</span>
+    <span class="tag">No API key needed</span>
+    <span class="tag">AI tools encouraged</span>
+  </div>
+
+  <div class="callout">
+    This mirrors the actual work: connecting an interface to data and an LLM, making an agent loop behave, and sweating the UX of how reasoning is shown. There are no trick questions — just a real (small) codebase with real rough edges.
+  </div>
+
+  <h2>Setup — nothing to request, nothing to provision</h2>
+  <p>Requirements: <strong>Node 18+</strong>. From the project folder:</p>
+  <pre>npm install
+npm run dev        # open the printed localhost URL</pre>
+  <p>The app starts in <strong>Mock model</strong> mode — a scripted, deterministic "model" so the whole thing runs with <strong>no API key</strong>. Everything in this exercise can be done in mock mode.</p>
+  <p class="muted">Optional (a nice-to-have, not required): copy <code>.env.example</code> → <code>.env.local</code>, drop in a free key from Groq, OpenRouter, or Cerebras, and flip the header toggle to "Real model." Any OpenAI-compatible, tool-calling model works.</p>
+
+  <h2>Part A — Fix three known issues</h2>
+
+  <div class="card">
+    <span class="tag">A1 · Streaming</span>
+    <h3>The answer doesn't stream</h3>
+    <p>The thinking trace updates live, but the assistant's written answer snaps in all at once when the turn finishes. Make the answer stream in token-by-token as it arrives.</p>
+  </div>
+
+  <div class="card">
+    <span class="tag">A2 · Agent loop</span>
+    <h3>Comparison questions hang</h3>
+    <p>Single questions work ("what was our blended ROAS in June?"), but anything needing more than one tool call — e.g. <em>"compare Meta and Google for last month"</em> — spins and never lands a clean answer. Make the agent handle a turn where the model requests more than one tool.</p>
+  </div>
+
+  <div class="card">
+    <span class="tag">A3 · Correctness</span>
+    <h3>The numbers are wrong</h3>
+    <p>At least one metric the agent reports is incorrect. Find the bug(s), fix them, and briefly note how you verified the corrected numbers. Trust nothing; check the math.</p>
+  </div>
+
+  <h2>Part B — Add one feature</h2>
+  <p>Pick the version you think adds the most value, and keep it tasteful:</p>
+  <div class="callout">
+    <strong>When an answer is a comparison or a time series, render a small inline chart in the response — and surface which tool calls / rows the answer is based on (source attribution).</strong> Use your judgment on when a visual actually helps versus when it just adds clutter.
+  </div>
+  <p class="muted">Use any libraries or component kits you like — shadcn, Base UI, Recharts, Tremor, whatever you reach for.</p>
+
+  <h2>Part C — Write it up (short)</h2>
+  <div class="step"><div class="step__n">1</div><div><strong>One-page design note.</strong> What each fix was, how you verified the data fix, the biggest risk if this shipped to production, and what you'd do with two more days.</div></div>
+  <div class="step"><div class="step__n">2</div><div><strong>~5-minute Loom.</strong> Walk through the app and one tradeoff you made.</div></div>
+
+  <h2>Ground rules</h2>
+  <ul>
+    <li><strong>Don't rewrite from scratch.</strong> Work in the codebase as given.</li>
+    <li><strong>Keep it runnable</strong> — <code>npm install &amp;&amp; npm run dev</code>, and mock mode must keep working with no key.</li>
+    <li>Time-box to ~2–3 hours. If you run out of time, say what you'd do next — that counts.</li>
+    <li>AI coding tools are expected. We care about the result and how well you understand it, which the walkthrough will show.</li>
+  </ul>
+
+  <h2>How we'll evaluate</h2>
+  <p>Correctness of the fixes, how cleanly you handle the agent loop, streaming and UX quality, code quality, product judgment (edge cases, when to visualize, statistical significance), and how clearly you communicate. The walkthrough matters as much as the code.</p>
+
+  <h2>Submitting</h2>
+  <ul>
+    <li>A link to your repo (GitHub/GitLab) <strong>or</strong> a StackBlitz/CodeSandbox fork.</li>
+    <li>Your one-page writeup (link or file).</li>
+    <li>Your Loom link.</li>
+  </ul>
+  <p class="muted">A live deployed URL (Vercel/Netlify/StackBlitz) is a plus, not a requirement.</p>
+
+  <hr class="hr" />
+  <p class="muted"><strong>About the data:</strong> it's a fixed 90-day snapshot where "today" is 2026-07-01, so "last month" means June 2026. Channel names in the raw data are intentionally inconsistent (<code>Meta</code> / <code>meta</code> / <code>Facebook</code>) and a couple of campaigns have gaps (a paused week, a mid-flight launch). That messiness is on purpose.</p>
+
+  <p class="foot">Shadow · Full-Stack Engineer take-home. Questions about the exercise itself are fine, but part of the test is working from what's here — so if something's ambiguous, make a reasonable call and note it in your writeup.</p>
+</div>
+</body>
+</html>
